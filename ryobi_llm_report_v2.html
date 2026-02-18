@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RYOBI × ChatGPT — Raport widoczności po optymalizacji</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #6AB023;
+    --green-dark: #4e8018;
+    --green-light: #8fd42e;
+    --black: #0e0e0e;
+    --card: #1e1e1e;
+    --card2: #252525;
+    --text: #f0f0f0;
+    --muted: #777;
+    --border: #2e2e2e;
+    --red: #e74c3c;
+    --yellow: #F5C518;
+    --blue: #5b8fc9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--black);
+    border-bottom: 3px solid var(--green);
+    padding: 26px 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo-pill {
+    background: var(--green);
+    padding: 9px 22px;
+    clip-path: polygon(0 0, 100% 0, 93% 100%, 0 100%);
+  }
+  .logo-pill span {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2rem;
+    letter-spacing: 5px;
+    color: #fff;
+  }
+
+  .header-center h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .header-center p {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 4px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .header-right { text-align: right; }
+  .header-right .date {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem; font-weight: 700; color: var(--text);
+  }
+  .header-right .scope {
+    font-size: 0.7rem; color: var(--muted); letter-spacing: 1.5px;
+    text-transform: uppercase; margin-top: 4px;
+  }
+
+  main { padding: 36px 52px; max-width: 1440px; margin: 0 auto; }
+
+  /* ── HIGHLIGHT BAR ── */
+  .highlight-bar {
+    background: linear-gradient(90deg, #0f1a08 0%, #162808 50%, #0f1a08 100%);
+    border: 1px solid #2d4a10;
+    border-left: 6px solid var(--green-light);
+    padding: 22px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    animation: fadeUp .4s ease both;
+  }
+
+  .highlight-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 4.5rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--green-light);
+    flex-shrink: 0;
+  }
+
+  .highlight-text {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: rgba(240,240,240,0.85);
+  }
+  .highlight-text strong { color: #fff; }
+
+  .highlight-note {
+    margin-left: auto;
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border);
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 160px;
+  }
+  .highlight-note .hn-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--yellow);
+    line-height: 1;
+  }
+  .highlight-note .hn-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 5px;
+  }
+
+  /* ── KPI ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--green);
+    padding: 20px 18px;
+    animation: fadeUp .5s ease both;
+  }
+
+  .kpi-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .kpi-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 2.8rem;
+    line-height: 1;
+    color: var(--green-light);
+  }
+  .kpi-value.yellow { color: var(--yellow); }
+  .kpi-sub { font-size: 0.74rem; color: var(--muted); margin-top: 6px; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 24px 26px;
+    animation: fadeUp .6s ease both;
+  }
+
+  .card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title::before {
+    content: '';
+    display: block;
+    width: 14px; height: 3px;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* ── KW TABLE ── */
+  .kw-item { margin-bottom: 11px; }
+  .kw-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .kw-name { font-size: 0.78rem; color: var(--text); flex: 1; padding-right: 10px; }
+  .kw-stat { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .kw-stat.hit { color: var(--green-light); }
+  .kw-stat.miss { color: #3a3a3a; }
+  .bar-track { height: 7px; background: var(--border); overflow: hidden; }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-dark), var(--green-light));
+    animation: barGrow 1.2s cubic-bezier(.22,.68,0,1.2) both;
+  }
+  .bar-fill.zero { background: #222; width: 100% !important; animation: none; }
+
+  @keyframes barGrow { from { width: 0 !important; } }
+
+  /* ── PRODUCT CARDS ── */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .product-card {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    padding: 18px 20px;
+    animation: fadeUp .7s ease both;
+  }
+
+  .product-card.dim { border-left-color: #333; }
+
+  .product-category {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+  .product-card.dim .product-category { color: var(--muted); }
+
+  .product-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.25rem;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .product-card.dim .product-name { color: #555; font-size: 1rem; }
+  .product-name em { font-style: normal; color: var(--green-light); }
+
+  .product-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+
+  .product-quote {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: rgba(106,176,35,0.06);
+    border-left: 2px solid var(--green);
+    font-size: 0.74rem;
+    font-style: italic;
+    color: rgba(240,240,240,0.6);
+    line-height: 1.5;
+  }
+  .product-card.dim .product-quote {
+    background: rgba(255,255,255,0.02);
+    border-left-color: #333;
+  }
+
+  /* ── FRAZY SPLIT ── */
+  .frazy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  .frazy-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    display: inline-block;
+    margin-bottom: 14px;
+  }
+  .tag-green { background: rgba(106,176,35,0.15); color: var(--green-light); }
+  .tag-grey  { background: rgba(255,255,255,0.06); color: #666; }
+
+  .frazy-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.8rem;
+  }
+  .f-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .f-dot.green { background: var(--green-light); }
+  .f-dot.grey  { background: #333; }
+  .f-text { flex: 1; }
+  .f-pct { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.88rem; }
+  .f-pct.hit  { color: var(--green-light); }
+  .f-pct.miss { color: #3a3a3a; }
+
+  /* ── FUNNEL ── */
+  .funnel-item { margin-bottom: 16px; }
+  .funnel-hdr { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.78rem; }
+  .funnel-hdr .fl { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; letter-spacing: 1px; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; }
+  .funnel-hdr .fr { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1rem; color: var(--green-light); }
+  .funnel-hdr .fr.zero { color: #333; }
+
+  /* ── BOTTOM ── */
+  .bottom-banner {
+    background: linear-gradient(90deg, #0f1a08, #1a3008);
+    border: 1px solid #2d4a10;
+    border-left: 6px solid var(--green-light);
+    padding: 24px 32px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 32px;
+    align-items: center;
+    margin-top: 4px;
+    animation: fadeUp .9s ease both;
+  }
+
+  .bottom-text { font-size: 0.88rem; line-height: 1.75; color: rgba(240,240,240,0.8); }
+  .bottom-text strong { color: #fff; }
+
+  .bottom-next { min-width: 210px; }
+  .next-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+  .next-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: rgba(240,240,240,0.75);
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    line-height: 1.4;
+  }
+  .next-item::before { content: '→'; color: var(--green-light); font-weight: 700; flex-shrink: 0; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 14px 52px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.63rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:18px;">
+    <div class="logo-pill"><span>RYOBI</span></div>
+    <div style="font-size:0.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">SEO × AIO × LLM</div>
+  </div>
+  <div class="header-center">
+    <h1>Widoczność w ChatGPT — raport po optymalizacji</h1>
+    <p>15 artykułów zoptymalizowanych pod LLM · 26 fraz · 224 zapytania testowe · ChatGPT</p>
+  </div>
+  <div class="header-right">
+    <div class="date">18.02.2026</div>
+    <div class="scope">Raport AIO / LLM</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── HIGHLIGHT BAR ── -->
+  <div class="highlight-bar">
+    <div class="highlight-num">11.2%</div>
+    <div class="highlight-text">
+      RYOBI pojawia się w <strong>25 z 224 odpowiedzi ChatGPT</strong> dla badanych fraz, na których bazowała optymalizacja 15 artykułów.
+      W <strong>10 z 26 fraz</strong> ChatGPT wymienia markę lub konkretne produkty — w tym z nazwy modele z serii ONE+.
+      Widoczność jest nierównomiernie rozłożona: najsilniejsza tam, gdzie treści są najbardziej rozbudowane.
+      <span style="color:var(--muted);font-size:0.82rem;display:block;margin-top:8px;">⚠ To pierwszy pomiar po optymalizacji — nie dysponujemy danymi bazowymi sprzed jej wdrożenia, więc nie możemy podać dokładnej zmiany. Niemniej wyniki pokazują realną obecność marki w odpowiedziach AI dla fraz produktowych.</span>
+    </div>
+    <div class="highlight-note">
+      <div class="hn-val">50%</div>
+      <div class="hn-label">maks. widoczność<br>na frazie</div>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">Widoczność ogólna</div>
+      <div class="kpi-value">11.2<span style="font-size:1.5rem;">%</span></div>
+      <div class="kpi-sub">25 z 224 odpowiedzi zawiera RYOBI</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Frazy z widocznością</div>
+      <div class="kpi-value">10<span style="font-size:1.5rem;color:var(--muted);">/26</span></div>
+      <div class="kpi-sub">38.5% badanych fraz — wyniki 10%–56%</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Sentyment pozytywny</div>
+      <div class="kpi-value yellow">36<span style="font-size:1.5rem;">%</span></div>
+      <div class="kpi-sub">9 z 25 wzmianek opisanych pozytywnie</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Śr. marek per odpowiedź</div>
+      <div class="kpi-value">5.9</div>
+      <div class="kpi-sub">konkurencja obecna w każdej odpowiedzi</div>
+    </div>
+  </div>
+
+  <!-- ── KEYWORD BARS + FUNNEL ── -->
+  <div class="grid-2" style="margin-bottom:24px;">
+
+    <div class="card">
+      <div class="card-title">Widoczność RYOBI wg frazy — wszystkie 26</div>
+      <div id="kw-bars"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Widoczność wg etapu lejka</div>
+
+      <div class="funnel-item">
+        <div class="funnel-hdr">
+          <span class="fl">Conversion</span>
+          <span class="fr">40% <span style="font-size:0.75rem;color:var(--muted);font-weight:400;">(4/10 odpowiedzi)</span></span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:40%"></div></div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:5px;">jaką wkrętarkę — najsilniejszy wynik etapu zakupowego</div>
+      </div>
+
+      <div class="funnel-item">
+        <div class="funnel-hdr">
+          <span class="fl">Consideration</span>
+          <span class="fr">11% <span style="font-size:0.75rem;color:var(--muted);font-weight:400;">(21/195 odpowiedzi)</span></span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:11%"></div></div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:5px;">największa pula fraz — duże zróżnicowanie (0%–56%)</div>
+      </div>
+
+      <div class="funnel-item">
+        <div class="funnel-hdr">
+          <span class="fl">Awareness</span>
+          <span class="fr zero">0% <span style="font-size:0.75rem;color:var(--muted);font-weight:400;">(0/26 odpowiedzi)</span></span>
+        </div>
+        <div class="bar-track"><div class="bar-fill zero" style="width:0%"></div></div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:5px;">frazy edukacyjne — brak wzmianek RYOBI, priorytet kolejnej fazy</div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin-top:24px;padding-top:20px;">
+        <div class="card-title">Sentyment 25 wzmianek</div>
+
+        <div class="funnel-item">
+          <div class="funnel-hdr">
+            <span class="fl" style="color:var(--green-light);">Pozytywny</span>
+            <span class="fr">9</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:36%"></div></div>
+        </div>
+
+        <div class="funnel-item">
+          <div class="funnel-hdr">
+            <span class="fl">Neutralny</span>
+            <span class="fr" style="color:var(--muted);">16</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:64%;background:linear-gradient(90deg,#333,#555)"></div></div>
+        </div>
+
+        <div style="margin-top:14px;font-size:0.78rem;color:var(--muted);line-height:1.6;">
+          Żadna wzmianka nie ma sentymentu negatywnego. ChatGPT opisuje RYOBI jako markę <em style="color:var(--text);">DIY</em>, z systemem <em style="color:var(--text);">ONE+</em>, o dobrym stosunku ceny do możliwości.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRODUCTS ── -->
+  <div style="margin-bottom:14px;">
+    <div class="card-title">Co ChatGPT konkretnie rekomenduje z RYOBI?</div>
+  </div>
+
+  <div class="product-grid">
+
+    <div class="product-card">
+      <div class="product-category">🌿 Kosiarki akumulatorowe</div>
+      <div class="product-name">RYOBI <em>OLM18X33</em> + seria <em>ONE+ 36V</em></div>
+      <div class="product-desc">ChatGPT podaje konkretne modele z numerami katalogowymi. OLM18X33 polecany do małych ogrodów jako lekka i prosta w obsłudze. Seria 36V (RY36LMX46A, RLM36X46) wskazywana jako opcja z większą szerokością koszenia i mulczowaniem.</div>
+      <div class="product-quote">"Kosiarka Ryobi z serii OLM / 18V lub 36V — duża szerokość koszenia, mulczowanie, pojemny kosz; szeroka sieć serwisowa i dostępność baterii Ryobi ONE+"</div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-category">🔩 Wiertarki / wiertarko-wkrętarki</div>
+      <div class="product-name">System <em>ONE+ 18V</em><br>— wiertarki i wkrętarki</div>
+      <div class="product-desc">RYOBI pojawia się w kategorii budżetowych i półprofesjonalnych rozwiązań dla majsterkowiczów. ChatGPT jako główny argument wskazuje system wymienny ONE+ — jeden akumulator do wielu narzędzi. Kieruje na ryobitools.eu/pl i sklepy Leroy Merlin, Castorama, Allegro.</div>
+      <div class="product-quote">"Ryobi ONE+ — dobre narzędzia w atrakcyjnej cenie, popularny system akumulatorowy (wiele narzędzi na jedną baterię). Dla użytkowników domowych i półprofesjonalnych."</div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-category">🪵 Szlifierki do drewna</div>
+      <div class="product-name">RYOBI <em>ONE+ 18V</em><br>— mimośrodowe</div>
+      <div class="product-desc">Pojawia się jako budżetowa alternatywa z modelami mimośrodowymi 18V. ChatGPT zaznacza, że jakość i kultura pracy mogą ustępować Makicie czy Boschowi, ale wskazuje RYOBI jako sensowny wybór, jeśli użytkownik ma już inne narzędzia ONE+.</div>
+      <div class="product-quote">"Einhell lub Ryobi (seria One+): mają modele mimośrodowe 18V i sieciowe w niższej cenie; przy mniejszym budżecie można trafić dobry egzemplarz"</div>
+    </div>
+
+    <div class="product-card dim">
+      <div class="product-category">❌ Kategorie bez wzmianek RYOBI</div>
+      <div class="product-name">Odkurzacze · Rozdrabniacze · Szlifierki do gładzi · Kosy i podkaszarki</div>
+      <div class="product-desc">W tych kategoriach RYOBI nie pojawia się w żadnej z badanych odpowiedzi. Widać to wyraźnie dla fraz takich jak "jaki odkurzacz do drewnianej podłogi" (0/10) czy "jaki rozdrabniacz do gałęzi" (0/5). To gotowa lista priorytetów dla kolejnej fazy — artykuły wymagają rozbudowy o bardziej szczegółowe dane techniczne, FAQ i porównania z konkurencją.</div>
+      <div class="product-quote">"moc ssania odkurzacza", "jaki rozdrabniacz do gałęzi", "czym się różni kosa od podkaszarki" — RYOBI nieobecne we wszystkich przebadanych odpowiedziach</div>
+    </div>
+
+  </div>
+
+  <!-- ── FRAZY SPLIT ── -->
+  <div class="frazy-grid">
+    <div class="card">
+      <div class="frazy-tag tag-green">✓ Frazy z widocznością RYOBI (10)</div>
+      <div id="frazy-hit"></div>
+    </div>
+    <div class="card">
+      <div class="frazy-tag tag-grey">⬜ Frazy bez wzmianki — do optymalizacji (16)</div>
+      <div id="frazy-miss"></div>
+    </div>
+  </div>
+
+  <!-- ── BOTTOM ── -->
+  <div class="bottom-banner">
+    <div class="bottom-text">
+      W badaniu 224 zapytań testowych do ChatGPT RYOBI pojawia się w <strong>10 z 26 fraz</strong>, na których opierała się optymalizacja 15 artykułów. Najsilniejsza widoczność dotyczy kategorii kosiarek i wiertarek — czyli tam, gdzie content jest najlepiej rozbudowany. ChatGPT wymienia <strong>konkretne serie: ONE+ 18V, ONE+ 36V, OLM18X33</strong> i kieruje użytkowników bezpośrednio na ryobitools.eu oraz do Leroy Merlin i Allegro. Żadna wzmianka nie ma sentymentu negatywnego. <strong>16 fraz z zerową widocznością to konkretna lista robocza</strong> — odkurzacze, rozdrabniacze i frazy edukacyjne (Awareness) to priorytet kolejnej rundy.
+    </div>
+    <div class="bottom-next">
+      <div class="next-title">Kolejne kroki</div>
+      <div class="next-item">Odkurzacze — rozbudowa FAQ i porównania z konkurencją</div>
+      <div class="next-item">Rozdrabniacze — dane tech, przykłady użycia</div>
+      <div class="next-item">Frazy Awareness — budowa kontekstu edukacyjnego</div>
+      <div class="next-item">Kolejny pomiar za 60–90 dni</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>RYOBI · AIO / LLM Optimization Report · ChatGPT · 18.02.2026 · n=224 zapytania · 26 fraz · 1 323 wzmianki marek w zbiorze danych</footer>
+
+<script>
+const kwData = [
+  { kw: "kosiarka akumulatorowa czas pracy",        hit: 5, total: 10, funnel: "Consideration" },
+  { kw: "czy warto kupić kosiarkę akumulatorową",   hit: 5, total: 9,  funnel: "Consideration" },
+  { kw: "jaką wkrętarkę",                           hit: 4, total: 10, funnel: "Conversion"    },
+  { kw: "ranking kosiarek akumulatorowych",          hit: 3, total: 8,  funnel: "Consideration" },
+  { kw: "jaką wiertarkę kupić",                     hit: 2, total: 10, funnel: "Consideration" },
+  { kw: "jaką szlifierkę do drewna wybrać",         hit: 2, total: 10, funnel: "Consideration" },
+  { kw: "jaką szlifierkę do drewna",                hit: 1, total: 9,  funnel: "Consideration" },
+  { kw: "jaka wiertarka udarowa",                   hit: 1, total: 10, funnel: "Consideration" },
+  { kw: "jaka kosiarka do wysokiej trawy",          hit: 1, total: 10, funnel: "Consideration" },
+  { kw: "zagłębiarka czy pilarka",                  hit: 1, total: 8,  funnel: "Consideration" },
+  { kw: "jaki łańcuch do twardego drewna",          hit: 0, total: 10, funnel: "Consideration" },
+  { kw: "jaką wiertarkę udarową wybrać",            hit: 0, total: 8,  funnel: "Consideration" },
+  { kw: "jaki odkurzacz do drewnianej podłogi",     hit: 0, total: 10, funnel: "Consideration" },
+  { kw: "szlifowanie gładzi szlifierką oscylacyjną",hit: 0, total: 9,  funnel: "Consideration" },
+  { kw: "jaka szlifierka do gładzi",                hit: 0, total: 10, funnel: "Consideration" },
+  { kw: "czym się różni kosa od podkaszarki",       hit: 0, total: 6,  funnel: "Consideration" },
+  { kw: "pojemność akumulatora",                    hit: 0, total: 9,  funnel: "Consideration" },
+  { kw: "co to jest pojemność akumulatora",         hit: 0, total: 9,  funnel: "Consideration" },
+  { kw: "jaki rozdrabniacz do gałęzi",              hit: 0, total: 5,  funnel: "Consideration" },
+  { kw: "czym rozdrobnić gałęzie",                  hit: 0, total: 8,  funnel: "Consideration" },
+  { kw: "moc ssania odkurzacza",                    hit: 0, total: 6,  funnel: "Consideration" },
+  { kw: "jak sprawdzić moc ssania odkurzacza",      hit: 0, total: 6,  funnel: "Consideration" },
+  { kw: "maksymalna moc odkurzacza",                hit: 0, total: 8,  funnel: "Consideration" },
+  { kw: "jaka szlifierka do parkietu",              hit: 0, total: 8,  funnel: "Awareness"     },
+  { kw: "jak i kiedy przycinać trawy ozdobne",      hit: 0, total: 10, funnel: "Awareness"     },
+  { kw: "czym przycinać trawy ozdobne",             hit: 0, total: 8,  funnel: "Awareness"     },
+];
+
+// Render bars
+const barsEl = document.getElementById('kw-bars');
+kwData.forEach(d => {
+  const pct = d.total > 0 ? Math.round(d.hit / d.total * 100) : 0;
+  const funnelColor = d.funnel === 'Conversion' ? '#F5C518' : d.funnel === 'Awareness' ? '#5b8fc9' : 'var(--muted)';
+  barsEl.innerHTML += `
+    <div class="kw-item">
+      <div class="kw-header">
+        <div class="kw-name">${d.kw} <span style="font-size:0.65rem;color:${funnelColor};letter-spacing:1px;">${d.funnel}</span></div>
+        <div class="kw-stat ${d.hit > 0 ? 'hit' : 'miss'}">${d.hit}/${d.total}</div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill ${d.hit === 0 ? 'zero' : ''}" style="width:${d.hit > 0 ? pct : 0}%"></div>
+      </div>
+    </div>
+  `;
+});
+
+// Frazy split
+const hitEl  = document.getElementById('frazy-hit');
+const missEl = document.getElementById('frazy-miss');
+
+kwData.forEach(d => {
+  const pct = d.total > 0 ? Math.round(d.hit / d.total * 100) : 0;
+  if (d.hit > 0) {
+    hitEl.innerHTML += `
+      <div class="frazy-item">
+        <div class="f-dot green"></div>
+        <div class="f-text">${d.kw}</div>
+        <div class="f-pct hit">${pct}%</div>
+      </div>
+    `;
+  } else {
+    missEl.innerHTML += `
+      <div class="frazy-item">
+        <div class="f-dot grey"></div>
+        <div class="f-text">${d.kw}</div>
+        <div class="f-pct miss">—</div>
+      </div>
+    `;
+  }
+});
+</script>
+</body>
+</html>
